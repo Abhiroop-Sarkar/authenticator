@@ -33,9 +33,9 @@ jobs:
         environment: [ 'dev', 'staging' ]
     env:
       AWS_ENVIRONMENT: ${{ matrix.environment }}
-    # if: ${{ github.env.AWS_ENVIRONMENT == 'dev' }}
+    if: ${{ github.env.AWS_ENVIRONMENT == 'dev' || github.env.AWS_ENVIRONMENT == 'staging'}}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
       - name: echo
-        run: echo ${{ github.env }}
+        run: echo ${{ github.env.AWS_ENVIRONMENT }}
