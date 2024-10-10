@@ -1,16 +1,48 @@
-name: Main
-
+name: main
 on:
   push:
     branches:
       - main
+      - test
   pull_request:
     branches:
       - main
 
+permissions:
+  id-token: write
+  contents: write
+  pull-requests: write
+  checks: write
+  actions: read
+
 jobs:
-  build-lambda:
+  step-1:
+    name: Step 1
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
+        uses: actions/checkout@v3
+
+  step-2:
+    name: Conditional Build and Deploy
+    runs-on: ubuntu-latest
+    needs: step-1
+    strategy:
+      matrix:
+        region: [ 'us-east-1', 'us-west-2' ]
+        environment: [ 'development', 'staging' ]
+    steps:
+      - name: Checkout Code
         uses: actions/checkout@v4
+
+      - name: Run Development Actions
+        if: matrix.environment == 'development'
+        run: |
+          echo "Running action for Development in ${{ matrix.region }}"
+          # Add your development action commands here
+
+      - name: Run Staging Actions
+        if: matrix.environment == 'staging' && github.ref == 'refs/heads/main'
+        run: |
+          echo "Running action for Staging in ${{ matrix.region }}"
+          # Add your staging action commands here
