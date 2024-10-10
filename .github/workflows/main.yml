@@ -1,16 +1,37 @@
-name: Main
-
+name: main 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
+  push:
+    branches:
+      - main
+      - test
+  pull_request:
+    branches:
+      - main 
+permissions:
+  id-token: write
+  contents: write
+  pull-requests: write
+  checks: write
+  actions: read  
 jobs:
-  build-lambda:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
+  step-1:
+    name: Step 1
+    runs-on: ubuntu-latest 
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3 
+  step-2:
+    runs-on: ubuntu-latest
+    needs: [ step-1 ]
+    strategy:
+      matrix:
+        region: [ 'us-east-1', 'us-west-2']
+        environment: [ 'dev', 'staging' ]
+    name: Build Infra and Deploy to ${{ matrix.environment == 'dev' && 'Development' || 'Staging' }} Environment - ${{ matrix.region == 'us-east-1' && 'Primary region' || 'Secondary region' }}
+    env:
+      AWS_ENVIRONMENT: ${{ matrix.environment }}
+      
+    if: ${{ github.env.AWS_ENVIRONMENT == 'dev' }} 
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
